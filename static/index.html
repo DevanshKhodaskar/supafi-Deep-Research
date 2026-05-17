@@ -1,0 +1,186 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<title>Legal Compliance Checker</title>
+
+<style>
+body{
+    font-family: Arial;
+    background:#f4f6fb;
+    padding:40px;
+}
+
+.container{
+    max-width:700px;
+    margin:auto;
+    background:white;
+    padding:30px;
+    border-radius:10px;
+    box-shadow:0 5px 20px rgba(0,0,0,0.1);
+}
+
+textarea{
+    width:100%;
+    height:120px;
+    padding:10px;
+    font-size:15px;
+}
+
+button{
+    margin-top:15px;
+    padding:10px 25px;
+    background:#4a6cf7;
+    color:white;
+    border:none;
+    border-radius:6px;
+    font-size:16px;
+    cursor:pointer;
+}
+
+button:hover{
+    background:#3c55d6;
+}
+
+.result{
+    margin-top:30px;
+    padding:20px;
+    border-radius:8px;
+    display:none;
+}
+
+.valid{ background:#e8f5e9; }
+.invalid{ background:#ffebee; }
+.conditional{ background:#fff8e1; }
+
+.section{
+    margin-top:15px;
+}
+
+ul{
+    padding-left:20px;
+}
+</style>
+
+</head>
+
+<body>
+
+<div class="container">
+
+<h2>🔍 Legal Compliance Checker</h2>
+
+<p>Describe the AI data collection workflow</p>
+
+<textarea id="activity"
+placeholder="Example: We collect user uploaded photos for facial recognition training."></textarea>
+
+<br>
+
+<button onclick="checkCompliance()">Check Compliance</button>
+
+<div id="loading" style="display:none;margin-top:20px;">
+Analyzing compliance...
+</div>
+
+<div id="result" class="result">
+
+<h3 id="status"></h3>
+
+<p><b>Risk Level:</b> <span id="risk"></span></p>
+
+<p id="summary"></p>
+
+<div class="section">
+<b>Sensitive Data Flags</b>
+<ul id="flags"></ul>
+</div>
+
+<div class="section">
+<b>Required Conditions</b>
+<ul id="conditions"></ul>
+</div>
+
+<div class="section">
+<b>Legal Citations</b>
+<ul id="citations"></ul>
+</div>
+
+</div>
+
+</div>
+
+<script>
+
+async function checkCompliance(){
+
+const activity = document.getElementById("activity").value
+
+if(!activity){
+alert("Please enter workflow description")
+return
+}
+
+document.getElementById("loading").style.display="block"
+document.getElementById("result").style.display="none"
+
+try{
+
+const response = await fetch("http://127.0.0.1:8000/check-compliance", {
+    method: "POST",
+    headers: {
+        "Content-Type": "application/json"
+    },
+    body: JSON.stringify({
+        platform_activity: activity
+    })
+});
+
+const data = await response.json()
+
+displayResult(data)
+
+}catch(error){
+alert("Error connecting to API")
+console.log(error)
+}
+
+document.getElementById("loading").style.display="none"
+
+}
+
+function displayResult(data){
+
+const resultBox=document.getElementById("result")
+
+resultBox.style.display="block"
+
+document.getElementById("status").innerText="Status: "+data.status
+document.getElementById("risk").innerText=data.risk_level
+document.getElementById("summary").innerText=data.summary
+
+fillList("flags",data.sensitive_data_flags)
+fillList("conditions",data.required_conditions)
+fillList("citations",data.citations)
+
+}
+
+function fillList(id,items){
+
+const ul=document.getElementById(id)
+ul.innerHTML=""
+
+if(!items) return
+
+items.forEach(item=>{
+const li=document.createElement("li")
+li.innerText=item
+ul.appendChild(li)
+})
+
+}
+
+</script>
+
+</body>
+</html>

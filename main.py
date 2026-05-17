@@ -11,7 +11,7 @@ load_dotenv()
 
 SYSTEM_PROMPT = """
 You are a Legal Data Collection Compliance Agent for a platform that connects AI companies with normal users.
-
+   
 Platform model:
 - AI companies post the type of data they want.
 - Normal users upload photos, videos, text, audio, documents, or other data.
